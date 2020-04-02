@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,32 @@
     <script src="js/ia.js"></script>
     <script src="js/logica.js"></script>
 </head>
+
 <body>
-    
+    <p></p>
+
+    <label for="input">Entradas (Input Resultado):</label><br>
+    <textarea name="input" id="input" cols="60" rows="10">2 1
+4 2
+6 3
+8 4
+10 5</textarea>
+    <br>
+    <br>
+    <label for="qtdeInteracoes">Interações:</label> 
+    <input type="text" name="qtdeInteracoes" id="qtdeInteracoes" size="10" value="100000">
+    <label for="qtdeFuncoes">Qtde Máx de Funções:</label> 
+    <input type="text" name="qtdeFuncoes" id="qtdeFuncoes" size="10" value="4">
+    <br>
+    <br>
+    <input type="button" value="Calcular" id="btnCalcular" onclick="calcular()">
+    <br>
+    <br>
+    <br>
+    <label for="input">Saída (Fórmulas Encontradas):</label><br>
+    <textarea name="output" id="output" cols="140" rows="33"></textarea>
+
+
 </body>
+
 </html>

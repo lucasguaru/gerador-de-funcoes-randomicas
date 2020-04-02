@@ -4,11 +4,16 @@ class IA {
         this.qtdeExperimentos = qtdeExperimentos;
         this.qtdeMaxFuncoesPorExperimentos = qtdeMaxFuncoesPorExperimentos + 1;
         this.arrFuncaoRandomica = [];
+        this.objFuncaoRandomica = {};
         for (let i = 0; i < qtdeExperimentos; i++) {
-            this.arrFuncaoRandomica.push(new FuncaoRandomica(this.qtdeMaxFuncoesPorExperimentos));
+            let fn = new FuncaoRandomica(this.qtdeMaxFuncoesPorExperimentos);
+            if (!this.objFuncaoRandomica.hasOwnProperty(fn.hash)) {
+                this.arrFuncaoRandomica.push(fn);
+                this.objFuncaoRandomica[fn.hash] = fn;
+            }
         }
-        let fnCheck = new FuncaoRandomica(this.qtdeMaxFuncoesPorExperimentos);
-        fnCheck.setCheck();
+        // let fnCheck = new FuncaoRandomica(this.qtdeMaxFuncoesPorExperimentos);
+        // fnCheck.setCheck();
         // this.arrFuncaoRandomica.push(fnCheck);
     }
 
@@ -27,6 +32,12 @@ class IA {
         this.arrFuncaoRandomicaFiltrada.forEach(elemFn => elemFn.print());
     }
 
+    gerarOutput() {
+        let result = ""
+        this.arrFuncaoRandomicaFiltrada.forEach(elemFn => result += elemFn.gerarOutput() + "\n");
+        return result;
+    }
+
     print1() {
         this.arrFuncaoRandomica
             .filter(elemFn => elemFn.arrayFn.length == 1)
@@ -40,6 +51,7 @@ class FuncaoRandomica {
 
     constructor(qtdeMax) {
         this.qtdeMax = qtdeMax;
+        this.valorInicial = [];
         let funcoes = [
             {
                 nome: "+",
@@ -69,7 +81,7 @@ class FuncaoRandomica {
             }, {
                 nome: "√",
                 exec: function(a, b) {
-                    return a + b;
+                    return Math.pow(a, 1/b);
                 }
             }, {
                 nome: "\\",
@@ -79,6 +91,7 @@ class FuncaoRandomica {
             }
         ];
         this.funcoes = funcoes;
+        this.hash = "";
           
         let qtdeFn = Math.floor(Math.random() * this.qtdeMax);
         this.arrayFn = [];
@@ -95,6 +108,7 @@ class FuncaoRandomica {
             }
             this.arrayValores.push(valorRandom);
             this.arrayValoresAntesDepois.push(antesOuDepois);
+            this.hash += antesOuDepois ? funcoes[idFuncao].nome + valorRandom : valorRandom + funcoes[idFuncao].nome;
         }
     }
 
@@ -105,7 +119,7 @@ class FuncaoRandomica {
     }
 
     calcular(a) {
-        this.valorInicial = a;
+        this.valorInicial.push(a);
         let result = a;
 
         this.arrayFn.forEach((fn, index) => {
@@ -118,23 +132,49 @@ class FuncaoRandomica {
         return result;
     }
 
-    print() {
-        let result = "";
-        for (let i = 0; i < this.arrayFn.length; i++) {
-            let a = " a ";
-            let b = " b(" +this.arrayValores[i] + ") ";
-            let f = this.arrayFn[i].nome;
+    calcularSimples(fn, antesOuDepois, result, valorRandom) {
+        let val1 = antesOuDepois ? result : valorRandom;
+        let val2 = antesOuDepois ? valorRandom: result;
+        return fn.exec(val1, val2);
+    }
 
-            let f1 = this.arrayValoresAntesDepois[i] ? a + f + b : b + f + a;
-            result += f1;
-        }
-        if (this.check) {
-            result = "*** " + result;
-        }
-        console.log("=> "  + result);
-        // console.table(this.arrayFn);
-        // console.table(this.arrayValores);
-        // console.table(this.arrayValoresAntesDepois);
+    gerarOutput() {
+        let resultStr =  ""; // `Input [${this.valorInicial[0]}] => \n`;
+        let resultHeader = "Fórmula =>";
+        // let result = this.valorInicial[0]
+        this.valorInicial.forEach((result, indexVI) => {
+            for (let i = 0; i < this.arrayFn.length; i++) {
+                let a = "[" + result + "]";
+                let b = this.arrayValores[i];
+                let f = this.arrayFn[i].nome;
+                result = this.calcularSimples(
+                    this.arrayFn[i],
+                    this.arrayValoresAntesDepois[i],
+                    result, b);
+                
+                let antes = this.arrayValoresAntesDepois[i];
+                let f1 = antes ? a + " " + f + " " + b : b + " " + f + " " + a;
+                resultStr += "  " + f1 + ", ";
+                if (indexVI == 0) {
+                    resultHeader += antes ? " a " + f + " b, ": " b " + f + " a, ";
+                }
+            }
+            if (this.check) {
+                resultStr = "*** " + resultStr;
+            }
+            resultStr = resultStr.substr(0, resultStr.length - 2) + " => " + result + "  \n";            
+            if (indexVI == 0) {
+            //     resultHeader += antes ? " a " + f + " b, ": " b " + f + " a, ";
+                resultHeader = resultHeader.substr(0, resultHeader.length - 2) + " \n";
+                resultStr = resultHeader + resultStr;
+            }
+        })
+        // resultStr = resultStr.substr(0, resultStr.length - 4);
+        return resultStr;
+    }
+
+    print() {
+        console.log(this.gerarOutput());
     }
 
 }
